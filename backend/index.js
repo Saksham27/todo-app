@@ -1,35 +1,52 @@
 const express = require('express');
+const {createTodo, markTodoDone} = require('./types');
+
 const app = express();
-
 app.use(express.json())
-
 const PORT = 3000;
-
 
 app.get('/todos',(req,res)=>{
     res.status(200).send("welcome")
 });
 
 
-/* req body
-{
-    "title":string,
-    "description":string
-}
-
-*/
 app.post('/create',(req,res)=>{
-    let todo = req.body.todo;
+    const createPayload = req.body;
+    const parsedPayload = createTodo.safeParse(createPayload);
+    if(!parsedPayload.success){
+        return res.status(411).json({
+            msg: "invalid input"
+        })
+        return;
+    }
+    // save in mongo
     console.log("Todo : "+todo);
     res.status(204).send('created');
 });
 
-/* req 
-    /markdone/todoid
-*/
-app.put('/markdone',(req,res)=>{
-    let todoid = req.query.todoid;
-    console.log(todoid);
+app.put('/markdone/:todoid',(req,res)=>{
+    const reqTodoid = req.params.todoid;
+    const parsedTodoid = markTodoDone.safeParse(reqTodoid);
+    if(!parsedTodoid.success){
+        return res.status(411).json({
+            msg:"invalid todo id format"
+        })
+        return;
+    }
+    console.log(reqTodoid);
+    res.status(200).send('done')
+})
+
+app.delete('/delete/:todoid',(req,res)=>{
+    const reqTodoid = req.params.todoid;
+    const parsedTodoid = markTodoDone.safeParse(reqTodoid);
+    if(!parsedTodoid.success){
+        return res.status(411).json({
+            msg:"invalid todo id format"
+        })
+        return;
+    }
+    console.log(reqTodoid);
     res.status(200).send('done')
 })
 

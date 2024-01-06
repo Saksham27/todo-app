@@ -1,4 +1,4 @@
-const zod = required('zod');
+const zod = require('zod');
 
 // schema for creating todo
 const CreateTodo = zod.object({
@@ -8,9 +8,7 @@ const CreateTodo = zod.object({
 
 
 // schema for mark todo done
-const markDone = zod.object({
-    id: zod.string()
-})
+const markDone = zod.string().uuid();
 
 module.exports = {
     createTodo : this.createTodo,
