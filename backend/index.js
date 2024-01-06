@@ -1,53 +1,124 @@
 const express = require('express');
 const {createTodo, markDoneOrDelete} = require('./types');
+const { todo } = require('./db');
 
 const app = express();
 app.use(express.json())
 const PORT = 3000;
 
-app.get('/todos',(req,res)=>{
-    res.status(200).send("welcome")
+app.get('/todos',async (req,res)=>{
+    try {
+        const todos = await todo.find({
+            isDeleted: false
+        });
+        return res.status(200).json({
+            msg:"success",
+            data:todos
+        })
+    } catch (error) {
+        console.log("Error : "+error);
+        return res.status(500).json({
+            msg:"something went wrong",
+           error: error.toString()
+        });
+    }
 });
 
 
-app.post('/create',(req,res)=>{
+app.post('/create',async (req,res)=>{
     const createPayload = req.body;
-    const parsedPayload = createTodo.safeParse(createPayload);
+
+    const parsedPayload = createTodo.safeParse(createPayload); // validate request
     if(!parsedPayload.success){
         return res.status(411).json({
             msg: "invalid input"
         })
-        return;
     }
-    // save in mongo
-    console.log("Todo : "+todo);
-    res.status(204).send('created');
+
+    try { // save in database
+        const createdtodo = await todo.create({
+            title:createPayload.title,
+            description: createPayload.description,
+            isDone : false,
+            isDeleted: false,
+            createdAt: Date.now(),
+            updatedAt: null,
+            deletedAt: null
+        })
+        return res.status(200).json({
+                msg:"success",
+                data: createdtodo._id
+            });
+    } catch (error) {
+        console.log("Error : "+error);
+        return res.status(500).json({
+            msg:"something went wrong",
+           error: error.toString()
+        });
+    }
 });
 
-app.put('/markdone/:todoid',(req,res)=>{
+app.put('/markdone/:todoid',async (req,res)=>{
+    const reqTodoid = req.params.todoid;
+    const parsedTodoid = markDoneOrDelete.safeParse(reqTodoid); // validate request
+    if(!parsedTodoid.success){
+        return res.status(411).json({
+            msg:"invalid todo id format"
+        })
+    }
+
+    try {
+        await todo.findOneAndUpdate({
+            _id: reqTodoid
+        },{
+            isDone: true,
+            updatedAt : Date.now()
+        })
+
+    } catch (error) {
+        console.log("Error : "+error);
+        return res.status(500).json({
+            msg:"something went wrong",
+           error: error.toString()
+        });
+
+    }
+
+    return res.status(200).json({
+        msg:`${reqTodoid} is marked done`,
+        data: reqTodoid
+    })
+})
+
+app.delete('/delete/:todoid',async (req,res)=>{
     const reqTodoid = req.params.todoid;
     const parsedTodoid = markDoneOrDelete.safeParse(reqTodoid);
     if(!parsedTodoid.success){
         return res.status(411).json({
             msg:"invalid todo id format"
-        })
-        return;
-    }
-    console.log(reqTodoid);
-    res.status(200).send('done')
-})
-
-app.delete('/delete/:todoid',(req,res)=>{
-    const reqTodoid = req.params.todoid;
-    const parsedTodoid = markTodoDone.safeParse(reqTodoid);
-    if(!parsedTodoid.success){
-        return res.status(411).json({
-            msg:"invalid todo id format"
         }) 
-        return;
     }
-    console.log(reqTodoid);
-    res.status(200).send('done')
+
+    try {
+        await todo.findOneAndUpdate({
+            _id: reqTodoid
+        },{
+            isDeleted: true,
+            deletedAt : Date.now()
+        })
+
+    } catch (error) {
+        console.log("Error : "+error);
+        return res.status(500).json({
+            msg:"something went wrong",
+           error: error.toString()
+        });
+
+    }
+    return res.status(200).json({
+        msg:`${reqTodoid} is deleted`,
+        data: reqTodoid
+    })
 })
 
 

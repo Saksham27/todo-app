@@ -1,16 +1,16 @@
 const zod = require('zod');
 
 // schema for creating todo
-const CreateTodo = zod.object({
+const createTodo = zod.object({
     title: zod.string(),
     description: zod.string()
 });
 
 
 // schema for mark todo done
-const markDoneOrDelete = zod.string().uuid();
+const markDoneOrDelete = zod.string();
 
 module.exports = {
-    createTodo : this.createTodo,
+    createTodo : createTodo,
     markDoneOrDelete : markDoneOrDelete
 }
