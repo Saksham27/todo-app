@@ -1,5 +1,5 @@
 const express = require('express');
-const {createTodo, markTodoDone} = require('./types');
+const {createTodo, markDoneOrDelete} = require('./types');
 
 const app = express();
 app.use(express.json())
@@ -26,7 +26,7 @@ app.post('/create',(req,res)=>{
 
 app.put('/markdone/:todoid',(req,res)=>{
     const reqTodoid = req.params.todoid;
-    const parsedTodoid = markTodoDone.safeParse(reqTodoid);
+    const parsedTodoid = markDoneOrDelete.safeParse(reqTodoid);
     if(!parsedTodoid.success){
         return res.status(411).json({
             msg:"invalid todo id format"
@@ -43,7 +43,7 @@ app.delete('/delete/:todoid',(req,res)=>{
     if(!parsedTodoid.success){
         return res.status(411).json({
             msg:"invalid todo id format"
-        })
+        }) 
         return;
     }
     console.log(reqTodoid);

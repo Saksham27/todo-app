@@ -8,9 +8,9 @@ const CreateTodo = zod.object({
 
 
 // schema for mark todo done
-const markDone = zod.string().uuid();
+const markDoneOrDelete = zod.string().uuid();
 
 module.exports = {
     createTodo : this.createTodo,
-    markTodoDone : markDone
+    markDoneOrDelete : markDoneOrDelete
 }
