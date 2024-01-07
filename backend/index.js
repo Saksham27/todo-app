@@ -1,9 +1,13 @@
 const express = require('express');
+const cors = require('cors')
 const {createTodo, markDoneOrDelete} = require('./types');
 const { todo } = require('./db');
 
 const app = express();
 app.use(express.json())
+app.use(cors({
+    origin:"http://localhost:5173"
+}))
 const PORT = 3000;
 
 app.get('/todos',async (req,res)=>{
